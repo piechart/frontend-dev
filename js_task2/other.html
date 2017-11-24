@@ -1,0 +1,90 @@
+<html>
+<script>
+
+var a = 2;
+var x = 1 + (a *= 2);
+console.log(x); // 5
+
+////////////////////////////////////////////////
+
+// Нет присваивания. Побитовые операторы рассматривают аргументы как 32-разрядные целые числа и работают на уровне их внутреннего двоичного представления.
+
+////////////////////////////////////////////////
+
+function isInteger(num) {
+    return num % 1 === 0 // строгое сравнение без приведения к одному типу
+}
+console.log( isInteger(1) ); // true
+console.log( isInteger(1.5) ); // false
+console.log( isInteger(-0.5) ); // false
+
+////////////////////////////////////////////////
+
+// Побитовые операции симметричны
+
+////////////////////////////////////////////////
+
+// 12345678912345 в двоичном 44 бита, отбрасываются до 32, число меняется
+
+////////////////////////////////////////////////
+
+if ("0") {
+  console.log( 'Hello' );
+} // выведется
+
+////////////////////////////////////////////////
+
+var title = "abc"; //prompt("real js name?", "");
+console.log(title == "ECMAScript" ? "Correct" : "Incorrect");
+
+////////////////////////////////////////////////
+
+var n = 1; // prompt("enter a num:", "");
+console.log(n > 1 ? "1" : (n == 0 ? "0" : "-1"));
+
+////////////////////////////////////////////////
+
+var login = "admin"; // confirm("login:");
+if (login === null ) {
+    console.log("login cancelled");
+} else if (login != "admin") {
+    console.log("user unknown");
+} else {
+    var pass = "black"; // confirm("pass:");
+    if (pass === null) {
+        console.log("auth cancelled");
+    } else if (pass == "black") {
+        console.log("auth succeeded");
+    } else {
+        console.log("wrong password");
+    }
+}
+
+////////////////////////////////////////////////
+
+console.log( null || 2 || undefined ); // 2
+console.log( alert(1) || 2 || alert(3) ); // 2
+console.log( alert(1) || 2 || alert(3) ); // 2
+console.log( 1 && null && 2 ); // null
+console.log( null || 2 && 3 || 4 ); // 3
+
+////////////////////////////////////////////////
+
+var age = 34;
+console.log(age >= 14 && age <= 90);
+
+////////////////////////////////////////////////
+
+var valid_age = age >= 14 && age <= 90
+if (age < 14 && age > 90 || !valid_age) {
+    console.log("age is out of range");
+}
+
+////////////////////////////////////////////////
+
+if (-1 || 0) console.log( 'first' ); // true
+if (-1 && 0) console.log( 'second' ); // false
+if (null || -1 && 1) console.log( 'third' ); // true
+
+</script>
+</html>

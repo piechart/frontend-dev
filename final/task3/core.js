@@ -10,19 +10,25 @@ var startAgainButtonId = 'startAgain';
 
 var currentPlayer = 2; // switchs between 1 and 2
 var currentSign = null; // player 1: x, player 2: o
+var gameFinished = false;
 
 window.onload = function() {
   beginGame();
 };
 
-function beginGame() {
+function setInitialValues() {
   currentPlayer = 2;
   gameMode = null;
   boardSize = null;
   board = null;
   nextStep(); // to set player 1 as a beginner
   setStartAgainButtonVisibility(false);
-  //
+  gameFinished = false
+}
+
+function beginGame() {
+  setInitialValues();
+
   gameMode = 1;
   // do {
   //   gameMode = prompt("Выберите режим игры: 1 - до первой линии, 2 - на очки (на время)", 1);
@@ -68,7 +74,7 @@ function drawBoard() {
 
 function cellClicked(row, column) {
   // put sign if allowed
-  if (board[row][column] == '.') {
+  if (board[row][column] == '.' && !gameFinished) {
     board[row][column] = currentSign;
     drawBoard();
     if (isVictory() == false) {
@@ -79,8 +85,10 @@ function cellClicked(row, column) {
         nextStep();
       }
     } else {
-      console.log("Victory");
-      // print something and start from the beginning
+      console.log("Victory!!");
+      updateStatus('Победил игрок #' + currentPlayer + '!');
+      setStartAgainButtonVisibility(true);
+      gameFinished = true;
     }
   }
 }
@@ -100,11 +108,20 @@ function updateStatus(status = '') {
 
 function isVictory() {
   console.log("Checking Victory...")
-  [
-    [0,0,.],
-    [0,.,1],
-    [0,1,1]
-  ]
+  var winnerValue = Array(boardSize).fill(currentSign);
+  if (equal(getDiagonal(0), winnerValue) || equal(getDiagonal(boardSize - 1), winnerValue)) {
+    return true;
+  }
+  for (var i = 0; i < boardSize; i++) {
+    if (equal(getRow(i), winnerValue) || equal(getColumn(i), winnerValue)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function equal(array1, array2) {
+  return JSON.stringify(array1) === JSON.stringify(array2)
 }
 
 function getRow(i) {
@@ -130,10 +147,11 @@ function getDiagonal(i) {
       result.push(board[j][j]);
     }
   } else {
-    for (var j = i; j > 0; j--) {
+    for (var j = i; j >= 0; j--) {
       result.push(board[j][j]);
     }
   }
+  return result;
 }
 
 function gameEnded() {

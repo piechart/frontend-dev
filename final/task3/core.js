@@ -23,7 +23,7 @@ function setInitialValues() {
   board = null;
   nextStep(); // to set player 1 as a beginner
   setStartAgainButtonVisibility(false);
-  gameFinished = false
+  gameFinished = false;
 }
 
 function beginGame() {
@@ -34,14 +34,14 @@ function beginGame() {
   //   gameMode = prompt("Выберите режим игры: 1 - до первой линии, 2 - на очки (на время)", 1);
   // } while (gameMode == null || gameMode == '');
   // gameMode = parseInt(gameMode);
-  // if (gameMode % 2 == 0) {
-  //   gameMode += 1;
-  // }
   boardSize = 3;
   // do {
   //   boardSize = prompt("Введите ширину доски в клетках", 3);
   // } while (boardSize == null || boardSize == '');
   // boardSize = parseInt(boardSize);
+  // if (boardSize % 2 == 0) {
+  //   boardSize += 1;
+  // }
   board = generateBoard();
   drawBoard();
   updateStatus();
@@ -75,21 +75,30 @@ function drawBoard() {
 function cellClicked(row, column) {
   // put sign if allowed
   if (board[row][column] == '.' && !gameFinished) {
+
     board[row][column] = currentSign;
     drawBoard();
+
     if (isVictory() == false) {
-      if (gameEnded()) {
-        updateStatus('Игра окончена');
-        setStartAgainButtonVisibility(true);
-      } else {
-        nextStep();
-      }
+      handleNoVictory()
     } else {
-      console.log("Victory!!");
-      updateStatus('Победил игрок #' + currentPlayer + '!');
-      setStartAgainButtonVisibility(true);
-      gameFinished = true;
+      handleVictory();
     }
+  }
+}
+
+function handleVictory() {
+  updateStatus('Победил игрок #' + currentPlayer + '!');
+  setStartAgainButtonVisibility(true);
+  gameFinished = true;
+}
+
+function handleNoVictory() {
+  if (gameEnded()) {
+    updateStatus('Игра окончена');
+    setStartAgainButtonVisibility(true);
+  } else {
+    nextStep();
   }
 }
 
@@ -107,7 +116,6 @@ function updateStatus(status = '') {
 }
 
 function isVictory() {
-  console.log("Checking Victory...")
   var winnerValue = Array(boardSize).fill(currentSign);
   if (equal(getDiagonal(0), winnerValue) || equal(getDiagonal(boardSize - 1), winnerValue)) {
     return true;
@@ -147,8 +155,10 @@ function getDiagonal(i) {
       result.push(board[j][j]);
     }
   } else {
-    for (var j = i; j >= 0; j--) {
-      result.push(board[j][j]);
+    var k = 0;
+    for (var j = boardSize - 1; j >= 0; j--) {
+      result.push(board[k][j]);
+      k++;
     }
   }
   return result;

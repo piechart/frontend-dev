@@ -1,35 +1,60 @@
+var DEFAULT_MODE = 1;
+var TIME_MODE = 2;
+
+var PLAYER1 = 1;
+var PLAYER2 = 2;
+
+var LEFT_TO_RIGHT = 0;
+
 var gameMode = null; // input. 1 - usual mode, 2 - points per time
 var boardSize = null; // input
-var board = null; // . - Unknown state, o - 0, x - X
+var board = null; // cell: . - empty, o - 0, x - X
 var gameTime = 15; // seconds
 
 var boardBlockId = 'boardBlock';
 var boardId = 'gameBoard';
 var statusLabelId = 'status';
 var startAgainButtonId = 'startAgain';
+var timeLabelId = 'time'
 
-var currentPlayer = 2; // switchs between 1 and 2
-var currentSign = null; // player 1: x, player 2: o
+var currentPlayer = 2; // switches between 1 and 2
+var currentChar = null; // player 1: x, player 2: o
 var gameFinished = false;
+var currentTime = 0;
+
+var p1_points = 0;
+var p2_points = 0;
+
+var tickTimerId = null;
+
+var emptyChar = '.';
+
+var winnerValue = null;
 
 window.onload = function() {
   beginGame();
 };
 
 function setInitialValues() {
-  currentPlayer = 2;
+  currentPlayer = PLAYER2;
   gameMode = null;
   boardSize = null;
   board = null;
   nextStep(); // to set player 1 as a beginner
   setStartAgainButtonVisibility(false);
   gameFinished = false;
+  p1_points = 0;
+  p2_points = 0;
+  currentTime = gameTime;
+  setTimeLabelVisibility(false);
+  clearInterval(tickTimerId);
+  winnerValue = null
 }
 
 function beginGame() {
   setInitialValues();
 
-  gameMode = 1;
+  gameMode = TIME_MODE;
   // do {
   //   gameMode = prompt("Выберите режим игры: 1 - до первой линии, 2 - на очки (на время)", 1);
   // } while (gameMode == null || gameMode == '');
@@ -45,6 +70,20 @@ function beginGame() {
   board = generateBoard();
   drawBoard();
   updateStatus();
+  if (gameMode == TIME_MODE) {
+    handleTimeModeSetup();
+  }
+}
+
+function handleTimeModeSetup() {
+  setTimeLabelVisibility(true);
+  tickTimerId = setInterval(function() {
+    document.getElementById(timeLabelId).innerHTML = '00:' + (currentTime < 10 ? '0' : '') + currentTime;
+    currentTime -= 1;
+    if (currentTime == -1) {
+      finishGame();
+    }
+  }, 1000);
 }
 
 function generateBoard() {
@@ -52,7 +91,7 @@ function generateBoard() {
   for (var i = 0; i < boardSize; i++) {
     var row = [];
     for (var j = 0; j < boardSize; j++) {
-      row[j] = '.';
+      row[j] = emptyChar;
     }
     board[i] = row;
   }
@@ -73,51 +112,84 @@ function drawBoard() {
 }
 
 function cellClicked(row, column) {
-  // put sign if allowed
-  if (board[row][column] == '.' && !gameFinished) {
+  // put char if allowed
+  if (board[row][column] == emptyChar && !gameFinished) {
 
-    board[row][column] = currentSign;
+    board[row][column] = currentChar;
     drawBoard();
 
-    if (isVictory() == false) {
-      handleNoVictory()
-    } else {
+    if (isVictory() == true) {
       handleVictory();
+    } else {
+      handleNoVictory();
     }
   }
 }
 
 function handleVictory() {
-  updateStatus('Победил игрок #' + currentPlayer + '!');
-  setStartAgainButtonVisibility(true);
-  gameFinished = true;
+  if (gameMode == DEFAULT_MODE) {
+    updateStatus('Победил игрок #' + currentPlayer + '!');
+    setStartAgainButtonVisibility(true);
+    gameFinished = true;
+  } else {
+    if (currentPlayer == PLAYER1) {
+      p1_points += boardSize;
+    } else {
+      p2_points += boardSize;
+    }
+    updateStatus();
+    handleNoVictory();
+  }
 }
 
 function handleNoVictory() {
-  if (gameEnded()) {
-    updateStatus('Игра окончена');
-    setStartAgainButtonVisibility(true);
+  if (isGameFinished()) {
+    finishGame()
   } else {
     nextStep();
   }
 }
 
+function finishGame() {
+  var status = 'Игра завершена. ';
+  if (gameMode == TIME_MODE) {
+    if (p1_points == p2_points) {
+      status += 'Победителя нет';
+    } else if (p1_points > p2_points) {
+      status += 'Победил игрок ' + PLAYER1 + ' (крестики)';
+    } else {
+      status += 'Победил игрок ' + PLAYER2 + ' (нолики)';
+    }
+    status += ': ' + p1_points + ' очков vs. ' + p2_points + ' очков';
+  }
+  updateStatus(status);
+  setStartAgainButtonVisibility(true);
+  gameFinished = true;
+  if (gameMode == TIME_MODE) {
+    setTimeLabelVisibility(false);
+    clearInterval(tickTimerId);
+  }
+}
+
 function nextStep() {
-  currentPlayer = (currentPlayer == 2) ? 1 : 2;
-  currentSign = (currentPlayer == 2) ? 'o' : 'x';
+  currentPlayer = (currentPlayer == PLAYER2) ? PLAYER1 : PLAYER2;
+  currentChar = (currentPlayer == PLAYER2) ? 'o' : 'x';
+  winnerValue = Array(boardSize).fill(currentChar);
   updateStatus();
 }
 
 function updateStatus(status = '') {
   if (status == '') {
-    status = 'Очередь игрока #' + currentPlayer + ' (' + (currentSign == 'o' ? 'нолики' : 'крестики') + ')';
+    status = 'Очередь игрока #' + currentPlayer + ' (' + (currentChar == 'o' ? 'нолики' : 'крестики') + ')';
+    if (gameMode == TIME_MODE) {
+      status += '. Очки игрока 1: ' + p1_points + ', очки игрока 2: ' + p2_points;
+    }
   }
   document.getElementById(statusLabelId).innerHTML = status
 }
 
 function isVictory() {
-  var winnerValue = Array(boardSize).fill(currentSign);
-  if (equal(getDiagonal(0), winnerValue) || equal(getDiagonal(boardSize - 1), winnerValue)) {
+  if (equal(getDiagonal(LEFT_TO_RIGHT), winnerValue) || equal(getDiagonal(boardSize - 1), winnerValue)) {
     return true;
   }
   for (var i = 0; i < boardSize; i++) {
@@ -137,6 +209,12 @@ function getRow(i) {
   for (var j = 0; j < boardSize; j++) {
     result.push(board[i][j]);
   }
+  // if (gameMode == TIME_MODE && equal(result, winnerValue)) {
+  //   for (var j = 0; j < boardSize; j++) {
+  //     board[i][j] = '*';
+  //   }
+  //   drawBoard();
+  // }
   return result;
 }
 
@@ -145,29 +223,47 @@ function getColumn(i) {
   for (var j = 0; j < boardSize; j++) {
     result.push(board[j][i]);
   }
+  // if (gameMode == TIME_MODE && equal(result, winnerValue)) {
+  //   for (var j = 0; j < boardSize; j++) {
+  //     board[j][i] = '*';
+  //   }
+  //   drawBoard();
+  // }
   return result;
 }
 
 function getDiagonal(i) {
   var result = [];
-  if (i == 0) {
+  if (i == LEFT_TO_RIGHT) {
     for (var j = 0; j < boardSize; j++) {
       result.push(board[j][j]);
     }
+    // if (gameMode == TIME_MODE && equal(result, winnerValue)) {
+    //   for (var j = 0; j < boardSize; j++) {
+    //     board[j][i] = '*';
+    //   }
+    //   drawBoard();
+    // }
   } else {
     var k = 0;
     for (var j = boardSize - 1; j >= 0; j--) {
-      result.push(board[k][j]);
-      k++;
+      result.push(board[k][j]); k++;
     }
+    // if (gameMode == TIME_MODE && equal(result, winnerValue)) {
+    //   k = 0;
+    //   for (var j = boardSize - 1; j >= 0; j--) {
+    //     board[k][j] = '*'; k++;
+    //   }
+    //   drawBoard();
+    // }
   }
   return result;
 }
 
-function gameEnded() {
+function isGameFinished() {
   for (var i = 0; i < boardSize; i++) {
     for (var j = 0; j < boardSize; j++) {
-      if (board[i][j] == ".") {
+      if (board[i][j] == emptyChar) {
         return false;
       }
     }
@@ -178,4 +274,9 @@ function gameEnded() {
 function setStartAgainButtonVisibility(visible=false) {
   var display = (visible == true) ? 'block' : 'none';
   document.getElementById(startAgainButtonId).style.display = display;
+}
+
+function setTimeLabelVisibility(visible=false) {
+  var display = (visible == true) ? 'block' : 'none';
+  document.getElementById(timeLabelId).style.display = display;
 }

@@ -12,7 +12,7 @@ python main.py input_file.html url_to_find url_to_replace_with blacklist_urls_li
 
 ![](scr/1_initial_file.png)
 
-2. Running script. URLs frequency dict printed.
+2. Run script and see URLs frequency dict has been printed.
 
 ![](scr/2_script_run.png)
 

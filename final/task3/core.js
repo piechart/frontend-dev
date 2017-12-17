@@ -16,7 +16,7 @@ var CHAR_WORDS = {};
 CHAR_WORDS[PLAYER1_CHAR] = 'крестики';
 CHAR_WORDS[PLAYER2_CHAR] = 'нолики';
 
-var GAME_TIMEOUT = 15; // seconds
+var GAME_TIMEOUT = 20; // seconds
 
 var BOARD_BLOCK_ID = 'boardBlock';
 var BOARD_ID = 'gameBoard';
@@ -195,6 +195,8 @@ function nextStep() {
 }
 
 function isVictory() {
+  var result = false;
+
   var diagonals = [LEFT_TO_RIGHT, RIGHT_TO_LEFT];
   for (var i = 0; i < diagonals.length; i++) {
     if (equal(getDiagonal(i), winnerValue)) {
@@ -202,26 +204,27 @@ function isVictory() {
       if (shouldAddPoints) {
         victoryDiagonals.push(i);
       }
-      return true
+      result = true
     }
   }
   for (var i = 0; i < boardSize; i++) {
     if (equal(getRow(i), winnerValue)) {
+      console.log(i, victoryRows, victoryRows.indexOf(i));
       shouldAddPoints = victoryRows.indexOf(i) == -1;
       if (shouldAddPoints) {
         victoryRows.push(i);
       }
-      return true;
+      result = true;
     }
     if (equal(getColumn(i), winnerValue)) {
       shouldAddPoints = victoryColumns.indexOf(i) == -1;
       if (shouldAddPoints) {
         victoryColumns.push(i);
       }
-      return true;
+      result = true;
     }
   }
-  return false;
+  return result;
 }
 
 function getRow(i) {

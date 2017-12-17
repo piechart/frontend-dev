@@ -209,7 +209,6 @@ function isVictory() {
   }
   for (var i = 0; i < boardSize; i++) {
     if (equal(getRow(i), winnerValue)) {
-      console.log(i, victoryRows, victoryRows.indexOf(i));
       shouldAddPoints = victoryRows.indexOf(i) == -1;
       if (shouldAddPoints) {
         victoryRows.push(i);
@@ -243,6 +242,7 @@ function getColumn(i) {
   return result;
 }
 
+// Here `i` is only used to determine direction of diagonal, nothing else
 function getDiagonal(i) {
   var result = [];
   if (i == LEFT_TO_RIGHT) {

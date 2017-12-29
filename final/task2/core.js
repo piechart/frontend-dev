@@ -22,10 +22,10 @@ function generate(containerID, matrix, coloring) {
 
             tbody += '<td style="td" ';
             if (coloring) {
-                var currentIndeces = [i, j];
-                if (arraysEqual(exteremes[0], currentIndeces)) {
+                var currentIndices = [i, j];
+                if (arraysEqual(exteremes[0], currentIndices)) {
                     tbody += 'bgcolor="#00bfff"';
-                } else if (arraysEqual(exteremes[1], currentIndeces))
+                } else if (arraysEqual(exteremes[1], currentIndices))
                     tbody += 'bgcolor="#ff4500"';
             }
 

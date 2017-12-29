@@ -47,8 +47,8 @@ function generate(containerID, matrix, coloring) {
 function findExtremes(matrix) {
     var maxIndices = [0, 0];
     var minIndices = [0, 0];
-    for (var i = 0; i < 3; i++) {
-        for (var j = 0; j < 3; j++) {
+    for (var i = 0; i < matrix.length; i++) {
+        for (var j = 0; j < matrix[0].length; j++) {
             if (matrix[i][j] > matrix[maxIndices[0]][maxIndices[1]])
                 maxIndices = [i, j];
             else if (matrix[i][j] < matrix[minIndices[0]][minIndices[1]])

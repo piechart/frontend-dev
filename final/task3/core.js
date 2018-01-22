@@ -87,7 +87,7 @@ function beginGame() {
   // boardSize = 3;
   do {
     boardSize = prompt("Введите ширину доски в клетках", 3);
-  } while (boardSize == null || boardSize == '');
+  } while (boardSize == null || boardSize == '' || boardSize < 0);
   boardSize = parseInt(boardSize);
   if (boardSize % 2 == 0) {
     boardSize += 1;
@@ -286,7 +286,7 @@ function drawBoard() {
 
 function updateStatus(status = '') {
   if (status == '') {
-    status = 'Очередь игрока #' + currentPlayer + ' (' + (currentChar == PLAYER2_CHAR ? CHAR_WORDS[PLAYER2_CHAR] : CHAR_WORDS[PLAYER1_CHAR]) + ')';
+    status = 'Очередь игрока #' + currentPlayer + ' (' + CHAR_WORDS[currentChar] + ')';
     if (gameMode == TIME_MODE) {
       status += '. Очки игрока 1: ' + p1_points + ', очки игрока 2: ' + p2_points;
     }

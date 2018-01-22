@@ -146,15 +146,20 @@ function handleVictory() {
     setStartAgainButtonVisibility(true);
     gameFinished = true;
   } else {
-    if (shouldAddPoints == true) {
-      if (currentPlayer == PLAYER1) {
-        p1_points += boardSize;
-      } else {
-        p2_points += boardSize;
-      }
-    }
+    addPointsIfNeeded();
     updateStatus();
     handleNoVictory();
+  }
+}
+
+function addPointsIfNeeded() {
+  if (shouldAddPoints == true && gameMode == TIME_MODE) {
+    if (currentPlayer == PLAYER1) {
+      p1_points += boardSize;
+    } else {
+      p2_points += boardSize;
+    }
+    shouldAddPoints = false;
   }
 }
 
@@ -210,13 +215,14 @@ function nextStep() {
 function isVictory() {
   var result = false;
 
-  var diagonals = [LEFT_TO_RIGHT, RIGHT_TO_LEFT];
+  var diagonals = [LEFT_TO_RIGHT, RIGHT_TO_LEFT]; // tricky: directions consts must follow numberic sequence
   for (var i = 0; i < diagonals.length; i++) {
     if (equal(getDiagonal(i), winnerValue)) {
       shouldAddPoints = victoryDiagonals.indexOf(i) == -1;
       if (shouldAddPoints) {
         victoryDiagonals.push(i);
       }
+      addPointsIfNeeded();
       result = true
     }
   }
@@ -226,6 +232,7 @@ function isVictory() {
       if (shouldAddPoints) {
         victoryRows.push(i);
       }
+      addPointsIfNeeded();
       result = true;
     }
     if (equal(getColumn(i), winnerValue)) {
@@ -233,6 +240,7 @@ function isVictory() {
       if (shouldAddPoints) {
         victoryColumns.push(i);
       }
+      addPointsIfNeeded();
       result = true;
     }
   }

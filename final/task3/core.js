@@ -166,6 +166,19 @@ function handleNoVictory() {
   }
 }
 
+function formatPoints(points) {
+  var result = points + " "
+  var lastDigit = points % 10
+  if (lastDigit == 1) {
+    result += "очко"
+  } else if (lastDigit >= 2 && lastDigit < 5) {
+    result += "очка"
+  } else {
+    result += "очков"
+  }
+  return result
+}
+
 function finishGame() {
   var status = 'Игра завершена. ';
   if (gameMode == TIME_MODE) {
@@ -176,7 +189,7 @@ function finishGame() {
     } else {
       status += 'Победил игрок ' + PLAYER2 + ' (' + CHAR_WORDS[PLAYER2_CHAR] + ')';
     }
-    status += ': ' + p1_points + ' очков vs. ' + p2_points + ' очков';
+    status += ': ' + formatPoints(p1_points) + ' vs. ' + formatPoints(p2_points);
   }
   updateStatus(status);
   setStartAgainButtonVisibility(true);

@@ -27,7 +27,7 @@ var STATUS_LABEL_ID = 'status';
 var START_AGAIN_BUTTON_ID = 'startAgain';
 var TIME_LABEL_ID = 'time'
 
-var DEBUG = true;
+var DEBUG = false;
 
 // Game variables
 

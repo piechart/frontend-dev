@@ -16,6 +16,9 @@ var CHAR_WORDS = {};
 CHAR_WORDS[PLAYER1_CHAR] = 'крестики';
 CHAR_WORDS[PLAYER2_CHAR] = 'нолики';
 
+var ITEMS_IN_ROW_TO_WIN = 5;
+var LIMITED_ITEMS_COUNT = 0; // to be counted after boardSize is set
+
 var GAME_TIMEOUT = 20; // seconds
 
 var BOARD_BLOCK_ID = 'boardBlock';
@@ -23,6 +26,8 @@ var BOARD_ID = 'gameBoard';
 var STATUS_LABEL_ID = 'status';
 var START_AGAIN_BUTTON_ID = 'startAgain';
 var TIME_LABEL_ID = 'time'
+
+var DEBUG = true;
 
 // Game variables
 
@@ -86,12 +91,19 @@ function beginGame() {
   }
   // boardSize = 3;
   do {
-    boardSize = prompt("Введите ширину доски в клетках", 3);
-  } while (boardSize == null || boardSize == '' || boardSize < 0);
+    boardSize = prompt("Введите ширину доски в клетках, <= 20", 8);
+  } while (boardSize == null || boardSize == '' || boardSize < 0 || boardSize > 20);
   boardSize = parseInt(boardSize);
   if (boardSize % 2 == 0) {
     boardSize += 1;
   }
+
+  LIMITED_ITEMS_COUNT = Math.min(boardSize, ITEMS_IN_ROW_TO_WIN);
+  if (DEBUG) {
+    console.log("LIMITED_ITEMS_COUNT:", LIMITED_ITEMS_COUNT);
+  }
+  generateWinnerValue();
+
   board = generateBoard();
   drawBoard();
   updateStatus();
@@ -130,6 +142,9 @@ function cellClicked(row, column) {
     board[row][column] = currentChar;
     drawBoard();
 
+    if (DEBUG) {
+      console.log("isVictory():", isVictory());
+    }
     if (isVictory() == true) {
       handleVictory();
     } else {
@@ -208,16 +223,25 @@ function finishGame() {
 function nextStep() {
   currentPlayer = (currentPlayer == PLAYER2) ? PLAYER1 : PLAYER2;
   currentChar = (currentPlayer == PLAYER2) ? PLAYER2_CHAR : PLAYER1_CHAR;
-  winnerValue = Array(boardSize).fill(currentChar);
+  generateWinnerValue();
   updateStatus();
+}
+
+function generateWinnerValue() {
+  winnerValue = Array(LIMITED_ITEMS_COUNT).fill(currentChar);
 }
 
 function isVictory() {
   var result = false;
 
+  if (DEBUG) {
+    console.log(">>> isVictory <<<");
+  }
+
   var diagonals = [LEFT_TO_RIGHT, RIGHT_TO_LEFT]; // tricky: directions consts must follow numberic sequence
   for (var i = 0; i < diagonals.length; i++) {
-    if (equal(getDiagonal(i), winnerValue)) {
+    // if (equal(getDiagonal(i), winnerValue)) {
+    if (arrayContainsWinnerValue(getDiagonal(i), winnerValue)) {
       shouldAddPoints = victoryDiagonals.indexOf(i) == -1;
       if (shouldAddPoints) {
         victoryDiagonals.push(i);
@@ -227,7 +251,8 @@ function isVictory() {
     }
   }
   for (var i = 0; i < boardSize; i++) {
-    if (equal(getRow(i), winnerValue)) {
+    // if (equal(getRow(i), winnerValue)) {
+    if (arrayContainsWinnerValue(getRow(i), winnerValue)) {
       shouldAddPoints = victoryRows.indexOf(i) == -1;
       if (shouldAddPoints) {
         victoryRows.push(i);
@@ -235,7 +260,8 @@ function isVictory() {
       addPointsIfNeeded();
       result = true;
     }
-    if (equal(getColumn(i), winnerValue)) {
+    // if (equal(getColumn(i), winnerValue)) {
+    if (arrayContainsWinnerValue(getColumn(i), winnerValue)) {
       shouldAddPoints = victoryColumns.indexOf(i) == -1;
       if (shouldAddPoints) {
         victoryColumns.push(i);
@@ -326,6 +352,32 @@ function setTimeLabelVisibility(visible=false) {
 }
 
 // Helpers
+
+function arrayContainsWinnerValue(array, winnerValue) {
+  // [1, 2, 2, 2, 2, 3, 4, 5], [2, 2, 2, 2] -> true
+  // [0, 1, 2, 3, 4, 5, 6, 7]
+  if (DEBUG) {
+    console.log("arrayContainsWinnerValue:");
+    console.log(array, winnerValue);
+  }
+  var result = false;
+  if (array.length > winnerValue.length) {
+    for (var i = 0; i < array.length - winnerValue.length; i++) {
+      var subSequence = array.slice(i, i + winnerValue.length);
+      if (DEBUG) {
+        console.log(subSequence);
+      }
+      if (equal(subSequence, winnerValue)) {
+        result = true;
+        break;
+      }
+    }
+  }
+  if (DEBUG) {
+    console.log("result", '-->', result);
+  }
+  return result;
+}
 
 function equal(array1, array2) {
   return JSON.stringify(array1) === JSON.stringify(array2)

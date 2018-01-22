@@ -6,9 +6,6 @@ var TIME_MODE = 2;
 var PLAYER1 = 1;
 var PLAYER2 = 2;
 
-var LEFT_TO_RIGHT = 0;
-var RIGHT_TO_LEFT = 1;
-
 var PLAYER1_CHAR = 'x';
 var PLAYER2_CHAR = 'o';
 var EMPTY_CHAR = '.';
@@ -145,7 +142,7 @@ function cellClicked(row, column) {
     if (DEBUG) {
       console.log("isVictory():", isVictory());
     }
-    if (isVictory() == true) {
+    if (isVictory(row, column) == true) {
       handleVictory();
     } else {
       handleNoVictory();
@@ -170,9 +167,9 @@ function handleVictory() {
 function addPointsIfNeeded() {
   if (shouldAddPoints == true && gameMode == TIME_MODE) {
     if (currentPlayer == PLAYER1) {
-      p1_points += boardSize;
+      p1_points += LIMITED_ITEMS_COUNT;
     } else {
-      p2_points += boardSize;
+      p2_points += LIMITED_ITEMS_COUNT;
     }
     shouldAddPoints = false;
   }
@@ -231,28 +228,26 @@ function generateWinnerValue() {
   winnerValue = Array(LIMITED_ITEMS_COUNT).fill(currentChar);
 }
 
-function isVictory() {
+function isVictory(row, column) {
   var result = false;
 
   if (DEBUG) {
     console.log(">>> isVictory <<<");
   }
 
-  var diagonals = [LEFT_TO_RIGHT, RIGHT_TO_LEFT]; // tricky: directions consts must follow numberic sequence
-  for (var i = 0; i < diagonals.length; i++) {
-    // if (equal(getDiagonal(i), winnerValue)) {
-    if (arrayContainsWinnerValue(getDiagonal(i), winnerValue)) {
-      shouldAddPoints = victoryDiagonals.indexOf(i) == -1;
-      if (shouldAddPoints) {
-        victoryDiagonals.push(i);
-      }
-      addPointsIfNeeded();
-      result = true
+  // checking diagonals from cell clicked
+  if (checkDiagonalsFromCell(row, column)) {
+    shouldAddPoints = victoryDiagonals.indexOf((row, column)) == -1;
+    if (shouldAddPoints) {
+      victoryDiagonals.push((row, column));
     }
+    addPointsIfNeeded();
+    result = true
   }
   for (var i = 0; i < boardSize; i++) {
+    // checking rows
     // if (equal(getRow(i), winnerValue)) {
-    if (arrayContainsWinnerValue(getRow(i), winnerValue)) {
+    if (arrayContainsWinnerValue(getRow(i))) {
       shouldAddPoints = victoryRows.indexOf(i) == -1;
       if (shouldAddPoints) {
         victoryRows.push(i);
@@ -260,8 +255,9 @@ function isVictory() {
       addPointsIfNeeded();
       result = true;
     }
+    // checking columns
     // if (equal(getColumn(i), winnerValue)) {
-    if (arrayContainsWinnerValue(getColumn(i), winnerValue)) {
+    if (arrayContainsWinnerValue(getColumn(i))) {
       shouldAddPoints = victoryColumns.indexOf(i) == -1;
       if (shouldAddPoints) {
         victoryColumns.push(i);
@@ -270,6 +266,74 @@ function isVictory() {
       result = true;
     }
   }
+  return result;
+}
+
+// returns true if there is winning sequense which directs diagonally somewhere from cell given
+function checkDiagonalsFromCell(i, j) {
+  var diagonals = getDiagonalsFromCell(i, j);
+  for (var i = 0; i < diagonals.length; i++) {
+    if (equal(diagonals[i], winnerValue)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// returns 4 possible diagonales from cell, two-dimensional array
+function getDiagonalsFromCell(i, j) {
+  var result = []; var part = [];
+  // top-left direction:
+  var a = i; var b = j;
+  while (a >= 0 && b >= 0) {
+    part.push(board[a][b]);
+    if (part.length == LIMITED_ITEMS_COUNT) break;
+    a--; b--;
+  }
+  if (part.length == LIMITED_ITEMS_COUNT) {
+    console.log("top-left")
+    result.push(part);
+  }
+  part = [];
+  // top-right direction:
+  a = i; b = j;
+  while (a >= 0 && b < boardSize) {
+    part.push(board[a][b]);
+    if (part.length == LIMITED_ITEMS_COUNT) break;
+    a--; b++;
+  }
+  if (part.length == LIMITED_ITEMS_COUNT) {
+    console.log("top-right")
+    result.push(part);
+  }
+  part = [];
+  // bottom-left direction:
+  a = i; b = j;
+  while (a < boardSize && b >= 0) {
+    console.log("a:", a, "b:", b);
+    part.push(board[a][b]);
+    if (part.length == LIMITED_ITEMS_COUNT) break;
+    a++; b--;
+  }
+  if (part.length == LIMITED_ITEMS_COUNT) {
+    result.push(part);
+    console.log("bottom-left");
+  }
+  part = [];
+  // bottom-right direction:
+  a = i; b = j;
+  while (a < boardSize && b < boardSize) {
+    part.push(board[a][b]);
+    if (part.length == LIMITED_ITEMS_COUNT) break;
+    a++; b++;
+  }
+  if (part.length == LIMITED_ITEMS_COUNT) {
+    result.push(part);
+    console.log("bottom-right");
+  }
+  // if (DEBUG) {
+    console.log(result);
+  // }
   return result;
 }
 
@@ -285,22 +349,6 @@ function getColumn(i) {
   var result = [];
   for (var j = 0; j < boardSize; j++) {
     result.push(board[j][i]);
-  }
-  return result;
-}
-
-// Here `i` is only used to determine direction of diagonal, nothing else
-function getDiagonal(i) {
-  var result = [];
-  if (i == LEFT_TO_RIGHT) {
-    for (var j = 0; j < boardSize; j++) {
-      result.push(board[j][j]);
-    }
-  } else {
-    var k = 0;
-    for (var j = boardSize - 1; j >= 0; j--) {
-      result.push(board[k][j]); k++;
-    }
   }
   return result;
 }
@@ -353,7 +401,7 @@ function setTimeLabelVisibility(visible=false) {
 
 // Helpers
 
-function arrayContainsWinnerValue(array, winnerValue) {
+function arrayContainsWinnerValue(array) {
   // [1, 2, 2, 2, 2, 3, 4, 5], [2, 2, 2, 2] -> true
   // [0, 1, 2, 3, 4, 5, 6, 7]
   if (DEBUG) {
@@ -380,5 +428,8 @@ function arrayContainsWinnerValue(array, winnerValue) {
 }
 
 function equal(array1, array2) {
+  if (array1.length != array2.length) {
+    return false
+  }
   return JSON.stringify(array1) === JSON.stringify(array2)
 }

@@ -44,7 +44,6 @@ var tickTimerId = null;
 
 var winnerValue = null;
 var victoryRows = [];
-var victoryColumns = [];
 var victoryDiagonals = [];
 var shouldAddPoints = false;
 
@@ -71,7 +70,6 @@ function setInitialValues() {
   clearInterval(tickTimerId);
   winnerValue = null;
   victoryRows = [];
-  victoryColumns = [];
   victoryDiagonals = [];
 }
 

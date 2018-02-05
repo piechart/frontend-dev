@@ -138,7 +138,7 @@ function cellClicked(row, column) {
     drawBoard();
 
     if (DEBUG) {
-      console.log("isVictory():", isVictory());
+      console.log(arguments.callee.name + "():", isVictory());
     }
     if (isVictory(row, column) == true) {
       handleVictory();
@@ -246,7 +246,7 @@ function isVictory(row, column) {
   // checking rows and columns from cell clicked
   if (checkSequenceFromCell(getRowsAndColumnsFromCell, row, column)) {
     if (DEBUG) {
-      console.log("checkSequenceFromCell(getRowsAndColumnsFromCell) == true", row, column);
+      console.log(arguments.callee.name + "(getRowsAndColumnsFromCell) == true", row, column);
       console.log("victoryRows:", victoryRows);
     }
     shouldAddPoints = victoryRows.indexOf([row, column]) == -1;
@@ -272,7 +272,7 @@ function checkSequenceFromCell(dataGetter, i, j) {
 
 function getRowsAndColumnsFromCell(i, j) {
   var result = []; var part = [];
-  function resultPush(debugCompletion) {
+  function pushResult(debugCompletion) {
     if (part.length == LIMITED_ITEMS_COUNT) {
       if (DEBUG) { debugCompletion(); }
       result.push(part);
@@ -285,7 +285,7 @@ function getRowsAndColumnsFromCell(i, j) {
     if (part.length == LIMITED_ITEMS_COUNT) break;
     a--;
   }
-  resultPush(function(){
+  pushResult(function(){
     console.log("top")
   })
   part = [];
@@ -296,7 +296,7 @@ function getRowsAndColumnsFromCell(i, j) {
     if (part.length == LIMITED_ITEMS_COUNT) break;
     b++;
   }
-  resultPush(function(){
+  pushResult(function(){
     console.log("right")
   })
   part = [];
@@ -307,7 +307,7 @@ function getRowsAndColumnsFromCell(i, j) {
     if (part.length == LIMITED_ITEMS_COUNT) break;
     a++;
   }
-  resultPush(function(){
+  pushResult(function(){
     console.log("bottom")
   })
   part = [];
@@ -318,7 +318,7 @@ function getRowsAndColumnsFromCell(i, j) {
     if (part.length == LIMITED_ITEMS_COUNT) break;
     b--;
   }
-  resultPush(function(){
+  pushResult(function(){
     console.log("left")
   })
   if (DEBUG) {
@@ -327,10 +327,10 @@ function getRowsAndColumnsFromCell(i, j) {
   return result;
 }
 
-// returns 4 possible diagonales from cell, two-dimensional array
+// returns 4 possible diagonals from cell, two-dimensional array
 function getDiagonalsFromCell(i, j) {
   var result = []; var part = [];
-  function resultPush(debugCompletion) {
+  function pushResult(debugCompletion) {
     if (part.length == LIMITED_ITEMS_COUNT) {
       if (DEBUG) { debugCompletion(); }
       result.push(part);
@@ -343,7 +343,7 @@ function getDiagonalsFromCell(i, j) {
     if (part.length == LIMITED_ITEMS_COUNT) break;
     a--; b--;
   }
-  resultPush(function(){
+  pushResult(function(){
     console.log("top-left");
   })
   part = [];
@@ -354,7 +354,7 @@ function getDiagonalsFromCell(i, j) {
     if (part.length == LIMITED_ITEMS_COUNT) break;
     a--; b++;
   }
-  resultPush(function(){
+  pushResult(function(){
     console.log("top-right");
   })
   part = [];
@@ -365,7 +365,7 @@ function getDiagonalsFromCell(i, j) {
     if (part.length == LIMITED_ITEMS_COUNT) break;
     a++; b--;
   }
-  resultPush(function(){
+  pushResult(function(){
     console.log("bottom-left");
   })
   part = [];
@@ -376,11 +376,11 @@ function getDiagonalsFromCell(i, j) {
     if (part.length == LIMITED_ITEMS_COUNT) break;
     a++; b++;
   }
-  resultPush(function(){
+  pushResult(function(){
     console.log("bottom-right");
   })
   if (DEBUG) {
-    console.log("getDiagonalsFromCell result:", result);
+    console.log(arguments.callee.name + " result:", result);
   }
   return result;
 }
@@ -453,7 +453,7 @@ function arrayContainsWinnerValue(array) {
   // [1, 2, 2, 2, 2, 3, 4, 5], [2, 2, 2, 2] -> true
   // [0, 1, 2, 3, 4, 5, 6, 7]
   if (DEBUG) {
-    console.log("arrayContainsWinnerValue:");
+    console.log(arguments.callee.name + ":");
     console.log(array, winnerValue);
   }
   var result = false;
